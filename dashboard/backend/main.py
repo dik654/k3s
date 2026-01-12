@@ -37,6 +37,9 @@ from kubernetes.client.rest import ApiException
 # ============================================
 from routers.workflow import router as workflow_router
 from routers.health import router as health_router
+from routers.vllm import router as vllm_router
+from routers.ontology import router as ontology_router
+from routers.comfyui import router as comfyui_router
 
 # 임베딩 모델 전역 변수 (지연 로딩)
 _embedding_models = {}  # {model_name: model_instance}
@@ -147,6 +150,9 @@ app.add_middleware(
 # ============================================
 app.include_router(workflow_router)
 app.include_router(health_router)
+app.include_router(vllm_router)
+app.include_router(ontology_router)
+app.include_router(comfyui_router)
 
 # Kubernetes 클라이언트 초기화
 def get_k8s_clients():
@@ -8034,39 +8040,39 @@ async def get_ontology_rag_integration():
 async def get_ontology_index_types():
     """Neo4j 인덱스 타입 설명"""
     return {
-        "index_types": [
+        "types": [
             {
-                "type": "Node Label Index",
+                "name": "Node Label Index",
                 "description": "노드 라벨별 빠른 조회",
-                "cypher": "CREATE INDEX FOR (n:Person) ON (n.name)",
+                "syntax": "CREATE INDEX FOR (n:Person) ON (n.name)",
                 "use_case": "특정 타입 노드 검색",
                 "icon": "🏷️"
             },
             {
-                "type": "Relationship Type Index",
+                "name": "Relationship Type Index",
                 "description": "관계 타입별 인덱스",
-                "cypher": "CREATE INDEX FOR ()-[r:WORKS_AT]-() ON (r.since)",
+                "syntax": "CREATE INDEX FOR ()-[r:WORKS_AT]-() ON (r.since)",
                 "use_case": "특정 관계 속성으로 필터링",
                 "icon": "🔗"
             },
             {
-                "type": "Full-text Index",
+                "name": "Full-text Index",
                 "description": "텍스트 전문 검색",
-                "cypher": "CREATE FULLTEXT INDEX personNames FOR (n:Person) ON EACH [n.name, n.bio]",
+                "syntax": "CREATE FULLTEXT INDEX personNames FOR (n:Person) ON EACH [n.name, n.bio]",
                 "use_case": "자연어 검색, 유사어 매칭",
                 "icon": "📝"
             },
             {
-                "type": "Vector Index",
+                "name": "Vector Index",
                 "description": "임베딩 벡터 유사도 검색",
-                "cypher": "CREATE VECTOR INDEX embeddingIndex FOR (n:Document) ON (n.embedding) OPTIONS {indexConfig: {`vector.dimensions`: 1024}}",
+                "syntax": "CREATE VECTOR INDEX embeddingIndex FOR (n:Document) ON (n.embedding) OPTIONS {indexConfig: {`vector.dimensions`: 1024}}",
                 "use_case": "시맨틱 검색, RAG",
                 "icon": "🎯"
             },
             {
-                "type": "Composite Index",
+                "name": "Composite Index",
                 "description": "복합 속성 인덱스",
-                "cypher": "CREATE INDEX FOR (n:Person) ON (n.department, n.role)",
+                "syntax": "CREATE INDEX FOR (n:Person) ON (n.department, n.role)",
                 "use_case": "다중 조건 검색 최적화",
                 "icon": "📊"
             }
@@ -9320,6 +9326,50 @@ async def stop_vllm():
         "message": "vLLM 중지 요청됨",
         "note": "실제 중지는 AI 워크로드 페이지에서 진행해주세요."
     }
+
+
+@app.post("/api/workloads/{workload_name}/stop")
+async def stop_workload(workload_name: str):
+    """워크로드 중지 API (프론트엔드 호환용)"""
+    if workload_name not in WORKLOADS:
+        raise HTTPException(status_code=404, detail=f"Unknown workload: {workload_name}")
+
+    try:
+        core_v1, apps_v1, _ = get_k8s_clients()
+        workload_config = WORKLOADS[workload_name]
+        namespace = workload_config["namespace"]
+
+        # 워크로드 replicas를 0으로 설정하여 중지
+        if "deployment" in workload_config:
+            apps_v1.patch_namespaced_deployment(
+                workload_config["deployment"],
+                namespace,
+                {"spec": {"replicas": 0}}
+            )
+        elif "statefulset" in workload_config:
+            apps_v1.patch_namespaced_stateful_set(
+                workload_config["statefulset"],
+                namespace,
+                {"spec": {"replicas": 0}}
+            )
+
+        return {
+            "success": True,
+            "workload": workload_name,
+            "action": "stop",
+            "message": f"{workload_name} 중지 요청이 전송되었습니다."
+        }
+    except ApiException as e:
+        if e.status == 404:
+            return {
+                "success": True,
+                "workload": workload_name,
+                "action": "stop",
+                "message": f"{workload_name}이(가) 이미 배포되지 않은 상태입니다."
+            }
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================

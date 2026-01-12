@@ -1741,6 +1741,183 @@ export function OverviewPage() {
               </button>
             </div>
           </div>
+
+          {/* Kubeflow - ML Platform */}
+          <div className="card workload-card">
+            <div className="workload-header">
+              <div className="workload-info">
+                <h3>🔬 Kubeflow</h3>
+                <p>ML 플랫폼 (파이프라인, 노트북, 모델 서빙)</p>
+              </div>
+              <span className={`workload-status ${workloads.kubeflow?.status === 'running' ? 'running' : workloads.kubeflow?.status === 'stopped' ? 'stopped' : 'not_deployed'}`}>
+                {workloads.kubeflow?.status === 'running' ? '실행중' : workloads.kubeflow?.status === 'stopped' ? '중지됨' : '미배포'}
+              </span>
+            </div>
+
+            {/* Kubeflow Components Info */}
+            <div className="kubeflow-stack-info" style={{ padding: '12px 0' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                <div style={{ background: 'var(--bg-tertiary)', padding: 10, borderRadius: 6, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>📊</div>
+                  <div style={{ fontSize: 12, fontWeight: 500 }}>Pipelines</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>ML 파이프라인</div>
+                </div>
+                <div style={{ background: 'var(--bg-tertiary)', padding: 10, borderRadius: 6, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>📓</div>
+                  <div style={{ fontSize: 12, fontWeight: 500 }}>Notebooks</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Jupyter 환경</div>
+                </div>
+                <div style={{ background: 'var(--bg-tertiary)', padding: 10, borderRadius: 6, textAlign: 'center' }}>
+                  <div style={{ fontSize: 20, marginBottom: 4 }}>🚀</div>
+                  <div style={{ fontSize: 12, fontWeight: 500 }}>KServe</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>모델 서빙</div>
+                </div>
+              </div>
+            </div>
+
+            {/* API Info (when running) */}
+            {workloads.kubeflow?.status === 'running' && (
+              <div className="api-info-box">
+                <div className="api-info-header">
+                  <Package size={14} />
+                  <span>연동 정보</span>
+                </div>
+                <div className="api-info-content">
+                  <div className="api-endpoint">
+                    <span className="label">Dashboard:</span>
+                    <code>http://kubeflow.14.32.100.220.nip.io</code>
+                  </div>
+                  <div className="api-endpoint">
+                    <span className="label">Pipelines API:</span>
+                    <code>http://kubeflow.14.32.100.220.nip.io/pipeline</code>
+                  </div>
+                  <div className="api-features">
+                    <span className="feature-tag">AutoML</span>
+                    <span className="feature-tag">분산 학습</span>
+                    <span className="feature-tag">모델 레지스트리</span>
+                  </div>
+                </div>
+                <div className="external-links" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <a href="http://kubeflow.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer" className="api-link">Dashboard 열기</a>
+                  <a href="http://kubeflow.14.32.100.220.nip.io/_/jupyter" target="_blank" rel="noopener noreferrer" className="api-link">Notebooks</a>
+                </div>
+              </div>
+            )}
+
+            <div className="workload-controls">
+              <button
+                className="btn btn-success"
+                onClick={() => handleWorkloadAction('kubeflow', 'start')}
+                disabled={actionLoading.kubeflow?.loading || workloads.kubeflow?.status === 'running'}
+              >
+                <Play size={16} /> {actionLoading.kubeflow?.loading && actionLoading.kubeflow?.action === 'start' ? '시작 중...' : '실행'}
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => handleWorkloadAction('kubeflow', 'stop')}
+                disabled={actionLoading.kubeflow?.loading || workloads.kubeflow?.status !== 'running'}
+              >
+                <Square size={16} /> {actionLoading.kubeflow?.loading && actionLoading.kubeflow?.action === 'stop' ? '중지 중...' : '중지'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* External UI Links Section */}
+      <section className="section">
+        <h2 className="section-title">외부 서비스 링크</h2>
+        <div className="external-links-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          {/* AI/ML Services */}
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Zap size={16} /> AI/ML 서비스
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <a href="http://kubeflow.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>🔬</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>Kubeflow Dashboard</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>ML 파이프라인, 노트북, 모델 서빙</div>
+                </div>
+              </a>
+              <a href="http://comfyui.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>🎨</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>ComfyUI</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>이미지/동영상 생성 워크플로우</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Data Services */}
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Database size={16} /> 데이터 서비스
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <a href="http://neo4j.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>🔗</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>Neo4j Browser</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>그래프 데이터베이스 UI</div>
+                </div>
+              </a>
+              <a href="http://minio.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>📦</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>MinIO Console</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>오브젝트 스토리지 관리</div>
+                </div>
+              </a>
+              <a href="http://ragflow.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>📚</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>RAGflow</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>RAG 엔진 및 지식 베이스</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Monitoring */}
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <RefreshCw size={16} /> 모니터링
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <a href="http://grafana.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>📈</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>Grafana</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>메트릭 시각화 및 대시보드</div>
+                </div>
+              </a>
+              <a href="http://longhorn.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>💾</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>Longhorn UI</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>분산 스토리지 관리</div>
+                </div>
+              </a>
+              <a href="http://rancher.14.32.100.220.nip.io" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 6, textDecoration: 'none', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: 16 }}>🐄</span>
+                <div>
+                  <div style={{ fontWeight: 500, fontSize: 13 }}>Rancher</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>멀티 클러스터 관리</div>
+                </div>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </div>

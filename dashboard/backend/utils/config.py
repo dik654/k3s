@@ -63,6 +63,42 @@ WORKLOADS = {
         "namespace": "ai-workloads",
         "deployment": "ragflow-elasticsearch",
         "description": "RAGflow Elasticsearch (검색 인덱스)"
+    },
+    "kubeflow": {
+        "namespace": "kubeflow",
+        "deployment": "ml-pipeline-ui",
+        "description": "Kubeflow ML 플랫폼 (파이프라인, 노트북, 모델 서빙)"
+    },
+    "kubeflow-pipelines": {
+        "namespace": "kubeflow",
+        "deployment": "ml-pipeline",
+        "description": "Kubeflow Pipelines API 서버"
+    },
+    "kubeflow-notebook": {
+        "namespace": "kubeflow",
+        "statefulset": "jupyter-notebook",
+        "description": "Kubeflow Jupyter 노트북 서버"
+    },
+    # Tinkerbell 베어메탈 프로비저닝
+    "tinkerbell": {
+        "namespace": "tinkerbell",
+        "deployment": "tink-server",
+        "description": "Tinkerbell 베어메탈 프로비저닝 서버"
+    },
+    "tinkerbell-boots": {
+        "namespace": "tinkerbell",
+        "deployment": "boots",
+        "description": "Tinkerbell DHCP/TFTP/HTTP 서버 (PXE 부팅)"
+    },
+    "tinkerbell-hegel": {
+        "namespace": "tinkerbell",
+        "deployment": "hegel",
+        "description": "Tinkerbell 메타데이터 서버"
+    },
+    "tinkerbell-rufio": {
+        "namespace": "tinkerbell",
+        "deployment": "rufio",
+        "description": "Tinkerbell BMC 컨트롤러 (IPMI/Redfish)"
     }
 }
 
@@ -132,3 +168,13 @@ NEO4J_URL = "bolt://neo4j-service.ai-workloads.svc.cluster.local:7687"
 # RAGflow 설정
 RAGFLOW_API_URL = "http://ragflow.ai-workloads.svc.cluster.local:9380"
 RAGFLOW_WEB_URL = "http://ragflow.ai-workloads.svc.cluster.local:80"
+
+# Tinkerbell 설정
+TINKERBELL_GRPC_URL = "tink-server.tinkerbell.svc.cluster.local:42113"
+TINKERBELL_HTTP_URL = "http://tink-server.tinkerbell.svc.cluster.local:42114"
+TINKERBELL_HEGEL_URL = "http://hegel.tinkerbell.svc.cluster.local:50061"
+
+# 베어메탈 렌탈 설정
+BAREMETAL_RENTAL_NAMESPACE = "baremetal-rental"
+BAREMETAL_DEFAULT_RENTAL_HOURS = 24  # 기본 대여 시간
+BAREMETAL_MAX_RENTAL_HOURS = 168  # 최대 대여 시간 (7일)

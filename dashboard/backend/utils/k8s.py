@@ -1,17 +1,14 @@
 """
 Kubernetes 클라이언트 및 헬퍼 함수
+
+환경 자동 감지:
+- KUBERNETES_SERVICE_HOST 환경변수가 있으면 → incluster_config (Pod 내부)
+- 없으면 → kubeconfig 파일 사용 (로컬 개발)
 """
-from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-def get_k8s_clients():
-    """Kubernetes API 클라이언트 초기화"""
-    try:
-        config.load_incluster_config()
-    except config.ConfigException:
-        config.load_kube_config()
-
-    return client.CoreV1Api(), client.AppsV1Api(), client.CustomObjectsApi()
+# 환경 감지 유틸리티에서 get_k8s_clients import
+from .k8s_client import get_k8s_clients
 
 
 def parse_cpu(cpu_str: str) -> float:

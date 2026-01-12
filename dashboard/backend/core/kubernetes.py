@@ -1,25 +1,28 @@
 """
 Kubernetes client initialization and utilities
+
+환경 자동 감지:
+- KUBERNETES_SERVICE_HOST 환경변수가 있으면 → incluster_config (Pod 내부)
+- 없으면 → kubeconfig 파일 사용 (로컬 개발)
 """
-from kubernetes import client, config
-from kubernetes.client.rest import ApiException
+# 새 환경 감지 유틸리티에서 re-export
+from utils.k8s_client import (
+    get_k8s_clients,
+    get_core_v1_api,
+    get_apps_v1_api,
+    get_custom_objects_api,
+    is_running_in_cluster,
+    get_environment_info,
+    ApiException,
+)
 
 
-def get_k8s_clients():
-    """Kubernetes API 클라이언트 초기화 및 반환
-
-    클러스터 내부에서 실행 중이면 in-cluster config 사용,
-    아니면 kubeconfig 파일 사용
-
-    Returns:
-        tuple: (CoreV1Api, AppsV1Api, CustomObjectsApi)
-    """
-    try:
-        config.load_incluster_config()
-    except config.ConfigException:
-        config.load_kube_config()
-
-    return client.CoreV1Api(), client.AppsV1Api(), client.CustomObjectsApi()
-
-
-__all__ = ['get_k8s_clients', 'ApiException']
+__all__ = [
+    'get_k8s_clients',
+    'get_core_v1_api',
+    'get_apps_v1_api',
+    'get_custom_objects_api',
+    'is_running_in_cluster',
+    'get_environment_info',
+    'ApiException',
+]

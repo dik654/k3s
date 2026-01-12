@@ -17,10 +17,24 @@ API 구조:
 - /api/parser/*      - 문서 파싱
 - /api/vectordb/*    - Vector DB RAG 가이드
 - /api/ragflow/*     - RAGflow RAG 엔진
+- /api/baremetal/*   - 베어메탈 프로비저닝 (Tinkerbell)
 """
+import os
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# 환경 설정
+ENV = os.getenv("ENV", "production")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "info").upper()
+
+# 로깅 설정
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 # ============================================
 # Routers - 기능별 모듈에서 가져오기
@@ -52,6 +66,9 @@ from routers import (
     gpu_router,
     benchmark_router,
     health_router,
+    # Baremetal
+    tinkerbell_router,
+    rental_router,
 )
 
 
@@ -64,10 +81,18 @@ app = FastAPI(
     description="K3s 클러스터 관리 및 AI 워크로드 대시보드"
 )
 
-# CORS 설정
+# CORS 설정 - 환경에 따라 다르게 설정
+if ENV == "development":
+    # 개발 환경: 로컬 Vite 개발 서버 허용
+    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+    logger.info(f"Development mode: CORS origins = {cors_origins}")
+else:
+    # 프로덕션: Pod 내부 통신이므로 모든 오리진 허용 (클러스터 내부)
+    cors_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,6 +140,10 @@ app.include_router(pipeline_router)
 # 벤치마크
 app.include_router(benchmark_router)
 
+# 베어메탈 프로비저닝
+app.include_router(tinkerbell_router)
+app.include_router(rental_router)
+
 
 # ============================================
 # 루트 엔드포인트
@@ -146,7 +175,9 @@ async def root():
             "workflows": "/api/workflows/*",
             "langgraph": "/api/langgraph/*",
             "pipeline": "/api/pipeline/*",
-            "benchmark": "/api/benchmark/*"
+            "benchmark": "/api/benchmark/*",
+            "baremetal": "/api/baremetal/*",
+            "baremetal_rentals": "/api/baremetal/rentals/*"
         },
         "external_services": {
             "ragflow_web": "http://<NODE_IP>:30081",

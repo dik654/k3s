@@ -33,7 +33,8 @@ import {
   GpuPage,
   PodsPage,
   StoragePage,
-  ClusterPage
+  ClusterPage,
+  BaremetalPage
 } from './pages';
 
 // Import CSS
@@ -61,7 +62,8 @@ const tabs: TabConfig[] = [
   { id: 'comfyui', label: 'ComfyUI', icon: <Image size={16} />, path: '/comfyui' },
   { id: 'neo4j', label: 'Neo4j', icon: <Brain size={16} />, path: '/neo4j' },
   { id: 'llm', label: 'LLM', icon: <MessageSquare size={16} />, path: '/llm' },
-  { id: 'parser', label: 'Parser', icon: <FileText size={16} />, path: '/parser' }
+  { id: 'parser', label: 'Parser', icon: <FileText size={16} />, path: '/parser' },
+  { id: 'baremetal', label: 'Baremetal', icon: <Server size={16} />, path: '/baremetal' }
 ];
 
 // Path to tab mapping
@@ -80,7 +82,8 @@ const pathToTab: Record<string, string> = {
   '/comfyui': 'comfyui',
   '/neo4j': 'neo4j',
   '/llm': 'llm',
-  '/parser': 'parser'
+  '/parser': 'parser',
+  '/baremetal': 'baremetal'
 };
 
 // Toast notification component
@@ -172,6 +175,7 @@ function App() {
           <Route path="/neo4j" element={<Neo4jPage showToast={showToast} />} />
           <Route path="/llm" element={<LLMPage showToast={showToast} />} />
           <Route path="/parser" element={<ParserPage />} />
+          <Route path="/baremetal" element={<BaremetalPage />} />
         </Routes>
       </main>
 

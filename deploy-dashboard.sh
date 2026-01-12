@@ -150,8 +150,8 @@ kubectl rollout restart deployment/${DEPLOYMENT_NAME} -n "${NAMESPACE}" 2>/dev/n
 
 log_info "Step 6: 배포 상태 확인"
 
-log_info "새 Pod 생성 대기 중 (최대 60초)..."
-for i in {1..12}; do
+log_info "새 Pod 생성 대기 중 (최대 180초)..."
+for i in {1..36}; do
     READY=$(kubectl get deployment "${DEPLOYMENT_NAME}" -n "${NAMESPACE}" \
         -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
     DESIRED=$(kubectl get deployment "${DEPLOYMENT_NAME}" -n "${NAMESPACE}" \
@@ -162,7 +162,10 @@ for i in {1..12}; do
         break
     fi
 
-    echo -n "."
+    # Pod 상태 간략히 표시
+    POD_STATUS=$(kubectl get pods -n "${NAMESPACE}" -l "app=${DEPLOYMENT_NAME}" \
+        -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "Unknown")
+    echo -n "[$POD_STATUS]"
     sleep 5
 done
 echo ""

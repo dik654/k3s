@@ -8,6 +8,7 @@ API Routers - 기능별 모듈화
 - rag/       : RAG/Vector DB (qdrant, vectordb, ragflow, parser, ontology)
 - workflow/  : 워크플로우 (workflow, langgraph, pipeline)
 - monitoring/: 모니터링 (gpu, benchmark, health)
+- baremetal/ : 베어메탈 프로비저닝 (tinkerbell, rental)
 """
 
 # Cluster 라우터
@@ -54,6 +55,12 @@ from .monitoring import (
     health_router
 )
 
+# Baremetal 프로비저닝 라우터
+from .baremetal import (
+    tinkerbell_router,
+    rental_router
+)
+
 __all__ = [
     # Cluster
     'cluster_router',
@@ -81,4 +88,7 @@ __all__ = [
     'gpu_router',
     'benchmark_router',
     'health_router',
+    # Baremetal
+    'tinkerbell_router',
+    'rental_router',
 ]

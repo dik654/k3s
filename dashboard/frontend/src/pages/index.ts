@@ -20,3 +20,4 @@ export { GpuPage } from './Gpu';
 export { PodsPage } from './Pods';
 export { StoragePage } from './Storage';
 export { ClusterPage } from './Cluster';
+export { BaremetalPage } from './Baremetal';

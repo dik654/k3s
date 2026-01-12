@@ -17,6 +17,7 @@ API 구조:
 - /api/parser/*      - 문서 파싱
 - /api/vectordb/*    - Vector DB RAG 가이드
 - /api/ragflow/*     - RAGflow RAG 엔진
+- /api/baremetal/*   - 베어메탈 프로비저닝 (Tinkerbell)
 """
 import os
 import logging
@@ -65,6 +66,9 @@ from routers import (
     gpu_router,
     benchmark_router,
     health_router,
+    # Baremetal
+    tinkerbell_router,
+    rental_router,
 )
 
 
@@ -136,6 +140,10 @@ app.include_router(pipeline_router)
 # 벤치마크
 app.include_router(benchmark_router)
 
+# 베어메탈 프로비저닝
+app.include_router(tinkerbell_router)
+app.include_router(rental_router)
+
 
 # ============================================
 # 루트 엔드포인트
@@ -167,7 +175,9 @@ async def root():
             "workflows": "/api/workflows/*",
             "langgraph": "/api/langgraph/*",
             "pipeline": "/api/pipeline/*",
-            "benchmark": "/api/benchmark/*"
+            "benchmark": "/api/benchmark/*",
+            "baremetal": "/api/baremetal/*",
+            "baremetal_rentals": "/api/baremetal/rentals/*"
         },
         "external_services": {
             "ragflow_web": "http://<NODE_IP>:30081",

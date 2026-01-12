@@ -81,6 +81,14 @@ check_dependencies() {
         exit 1
     fi
 
+    # Python 패키지 확인 및 설치
+    log_info "Python 패키지 확인 중..."
+    cd "$BACKEND_DIR"
+    if ! python3 -c "import uvicorn" &> /dev/null; then
+        log_warn "uvicorn이 설치되어 있지 않습니다. 설치 중..."
+        pip3 install -r requirements.txt
+    fi
+
     log_success "모든 의존성 확인 완료"
 }
 
@@ -167,23 +175,34 @@ start_frontend() {
         npm install
     fi
 
-    # Vite 개발 서버 실행
-    npm run dev &
+    # Vite 개발 서버 실행 (--host로 외부 접속 허용)
+    npx vite --host 0.0.0.0 --port 5173 &
     save_pid $!
 
-    log_success "프론트엔드 서버 시작됨 (http://localhost:5173)"
+    # 로컬 IP 가져오기
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+    log_success "프론트엔드 서버 시작됨 (http://localhost:5173, http://${LOCAL_IP}:5173)"
 }
 
 # 상태 표시
 show_status() {
+    # 로컬 IP 가져오기
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+
     echo ""
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}  로컬 개발 환경 실행 중${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo ""
-    echo -e "  ${BLUE}프론트엔드:${NC} http://localhost:5173"
-    echo -e "  ${BLUE}백엔드 API:${NC} http://localhost:8000"
-    echo -e "  ${BLUE}API 문서:${NC}   http://localhost:8000/docs"
+    echo -e "  ${BLUE}프론트엔드:${NC}"
+    echo -e "    - http://localhost:5173"
+    echo -e "    - http://${LOCAL_IP}:5173  (외부 접속)"
+    echo ""
+    echo -e "  ${BLUE}백엔드 API:${NC}"
+    echo -e "    - http://localhost:8000"
+    echo -e "    - http://${LOCAL_IP}:8000  (외부 접속)"
+    echo ""
+    echo -e "  ${BLUE}API 문서:${NC}   http://${LOCAL_IP}:8000/docs"
     echo ""
     echo -e "  ${YELLOW}포트포워딩 (가능한 경우):${NC}"
     echo -e "    - Fleet API:  localhost:8081"

@@ -63,6 +63,21 @@ WORKLOADS = {
         "namespace": "ai-workloads",
         "deployment": "ragflow-elasticsearch",
         "description": "RAGflow Elasticsearch (검색 인덱스)"
+    },
+    "kubeflow": {
+        "namespace": "kubeflow",
+        "deployment": "ml-pipeline-ui",
+        "description": "Kubeflow ML 플랫폼 (파이프라인, 노트북, 모델 서빙)"
+    },
+    "kubeflow-pipelines": {
+        "namespace": "kubeflow",
+        "deployment": "ml-pipeline",
+        "description": "Kubeflow Pipelines API 서버"
+    },
+    "kubeflow-notebook": {
+        "namespace": "kubeflow",
+        "statefulset": "jupyter-notebook",
+        "description": "Kubeflow Jupyter 노트북 서버"
     }
 }
 

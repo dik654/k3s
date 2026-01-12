@@ -1,0 +1,57 @@
+version: '3.8'
+
+# 로컬 개발 환경용 Docker Compose
+# 사용법: docker-compose -f docker-compose.dev.yml up
+
+services:
+  # FastAPI 백엔드
+  backend:
+    build:
+      context: ./dashboard/backend
+      dockerfile: Dockerfile.dev
+    container_name: k3s-dashboard-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # 소스 코드 마운트 (핫 리로드)
+      - ./dashboard/backend:/app
+      # kubeconfig 마운트 (K8s API 접근)
+      - ~/.kube:/root/.kube:ro
+    environment:
+      - ENV=development
+      - LOG_LEVEL=debug
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+      # K8s 서비스 URL 오버라이드 (필요시 주석 해제)
+      # - VLLM_URL=http://host.docker.internal:8001
+      # - QDRANT_URL=http://host.docker.internal:6333
+    networks:
+      - k3s-dev
+    # Linux에서 host.docker.internal 사용을 위해
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # Vite 프론트엔드
+  frontend:
+    build:
+      context: ./dashboard/frontend
+      dockerfile: Dockerfile.dev
+    container_name: k3s-dashboard-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # 소스 코드 마운트 (핫 리로드)
+      - ./dashboard/frontend:/app
+      # node_modules는 컨테이너 내부 사용 (성능)
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - k3s-dev
+    restart: unless-stopped
+
+networks:
+  k3s-dev:
+    driver: bridge

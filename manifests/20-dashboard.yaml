@@ -82,29 +82,38 @@ spec:
         # 이미지 태그는 배포 스크립트에서 동적으로 변경됨
         # 예: k3s-dashboard:v20240115-123456
         image: k3s-dashboard:latest
-        # IfNotPresent: 로컬에 있으면 사용, 없으면 풀
-        # 타임스탬프 태그를 사용하면 항상 새 이미지로 인식됨
-        imagePullPolicy: IfNotPresent
+        # Never: 로컬 이미지 사용 (레지스트리에서 pull하지 않음)
+        # 이미지는 k3s ctr images import로 미리 로드되어야 함
+        imagePullPolicy: Never
         ports:
         - containerPort: 8000
           name: http
-        # 컨테이너 상태 확인
+        # 컨테이너 상태 확인 (시작 시간 충분히 확보)
         livenessProbe:
           httpGet:
             path: /api/health
             port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 20
-          timeoutSeconds: 5
-          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /api/health
             port: 8000
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 3
+          timeoutSeconds: 5
+          failureThreshold: 5
+        # 시작 프로브: 앱이 완전히 시작될 때까지 대기
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 30  # 최대 150초 대기
         resources:
           requests:
             memory: "256Mi"

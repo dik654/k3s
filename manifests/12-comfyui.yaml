@@ -1,0 +1,90 @@
+# ComfyUI 이미지 생성 서비스
+# GPU: 1-2개 사용 (SDXL 기준)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui
+  namespace: ai-workloads
+  labels:
+    app: comfyui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comfyui
+  template:
+    metadata:
+      labels:
+        app: comfyui
+    spec:
+      containers:
+      - name: comfyui
+        image: ghcr.io/ai-dock/comfyui:latest
+        ports:
+        - containerPort: 8188
+          name: http
+        env:
+        - name: COMFYUI_PORT
+          value: "8188"
+        - name: CLI_ARGS
+          value: "--listen 0.0.0.0"
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+          requests:
+            memory: "16Gi"
+            cpu: "4"
+        volumeMounts:
+        - name: data
+          mountPath: /workspace
+        - name: shm
+          mountPath: /dev/shm
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: comfyui-data-pvc
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+      nodeSelector:
+        gpu: "true"
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui
+  namespace: ai-workloads
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8188
+    targetPort: 8188
+    name: http
+  selector:
+    app: comfyui
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: comfyui
+  namespace: ai-workloads
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: comfyui.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: comfyui
+            port:
+              number: 8188

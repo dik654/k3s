@@ -1,0 +1,206 @@
+# 워크로드별 스토리지 설정
+# 각 워크로드마다 hostPath PV/PVC 사용
+---
+# vLLM 모델 스토리지 (200GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vllm-models-pv
+  labels:
+    type: local
+    app: vllm
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/vllm/models
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-models-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi
+  selector:
+    matchLabels:
+      app: vllm
+---
+# Qdrant 데이터 스토리지 (100GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: qdrant-data-pv
+  labels:
+    type: local
+    app: qdrant
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/qdrant/data
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qdrant-data-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      app: qdrant
+---
+# ComfyUI 데이터 스토리지 (모델, 출력 등 - 300GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: comfyui-data-pv
+  labels:
+    type: local
+    app: comfyui
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 300Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/comfyui
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: comfyui-data-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 300Gi
+  selector:
+    matchLabels:
+      app: comfyui
+---
+# VLM (Vision Language Model) 스토리지 (100GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vlm-data-pv
+  labels:
+    type: local
+    app: vlm
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/vlm
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vlm-data-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      app: vlm
+---
+# RustFS (오브젝트 스토리지) 데이터 (500GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rustfs-data-pv
+  labels:
+    type: local
+    app: rustfs
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/rustfs/data
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rustfs-data-pvc
+  namespace: storage
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi
+  selector:
+    matchLabels:
+      app: rustfs
+---
+# 공유 모델 스토리지 (여러 서비스에서 공유 가능 - 200GB)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shared-models-pv
+  labels:
+    type: local
+    app: shared
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: /data/k3s/shared-models
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-models-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 200Gi
+  selector:
+    matchLabels:
+      app: shared

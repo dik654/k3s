@@ -1,0 +1,321 @@
+# AI Workloads Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-workloads
+---
+# Storage Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+---
+# ============================================
+# vLLM Deployment
+# ============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-server
+  namespace: ai-workloads
+  labels:
+    app: vllm
+spec:
+  replicas: 0  # 초기에는 0으로 시작 (대시보드에서 시작)
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      containers:
+        - name: vllm
+          image: vllm/vllm-openai:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MODEL
+              value: "facebook/opt-125m"  # 데모용 작은 모델
+          resources:
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+            limits:
+              cpu: "4"
+              memory: "16Gi"
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: model-cache
+              mountPath: /root/.cache/huggingface
+      volumes:
+        - name: model-cache
+          emptyDir: {}
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-server
+  namespace: ai-workloads
+spec:
+  selector:
+    app: vllm
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# ============================================
+# Qdrant StatefulSet
+# ============================================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+  namespace: ai-workloads
+  labels:
+    app: qdrant
+spec:
+  serviceName: qdrant
+  replicas: 0  # 초기에는 0으로 시작
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:latest
+          ports:
+            - containerPort: 6333
+              name: http
+            - containerPort: 6334
+              name: grpc
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /qdrant/storage
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant
+  namespace: ai-workloads
+spec:
+  selector:
+    app: qdrant
+  ports:
+    - port: 6333
+      targetPort: 6333
+      name: http
+    - port: 6334
+      targetPort: 6334
+      name: grpc
+---
+# ============================================
+# RustFS StatefulSet (MinIO 대체용으로 임시 구현)
+# 실제 RustFS가 준비되면 교체
+# ============================================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rustfs
+  namespace: storage
+  labels:
+    app: rustfs
+spec:
+  serviceName: rustfs
+  replicas: 0  # 초기에는 0으로 시작
+  selector:
+    matchLabels:
+      app: rustfs
+  template:
+    metadata:
+      labels:
+        app: rustfs
+    spec:
+      containers:
+        - name: rustfs
+          image: minio/minio:latest  # RustFS 대신 MinIO 사용 (데모용)
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          ports:
+            - containerPort: 9000
+              name: api
+            - containerPort: 9001
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              value: "admin"
+            - name: MINIO_ROOT_PASSWORD
+              value: "admin1234"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: storage
+spec:
+  selector:
+    app: rustfs
+  ports:
+    - port: 9000
+      targetPort: 9000
+      name: api
+    - port: 9001
+      targetPort: 9001
+      name: console
+---
+# ============================================
+# GPU Metrics Collector DaemonSet
+# nsenter를 사용하여 호스트에서 nvidia-smi 실행
+# ============================================
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gpu-metrics-collector
+  namespace: dashboard
+  labels:
+    app: gpu-metrics
+spec:
+  selector:
+    matchLabels:
+      app: gpu-metrics
+  template:
+    metadata:
+      labels:
+        app: gpu-metrics
+    spec:
+      hostPID: true
+      tolerations:
+        - operator: "Exists"
+      containers:
+        - name: collector
+          image: python:3.11-slim
+          command:
+            - /bin/bash
+            - -c
+            - |
+              pip install flask > /dev/null 2>&1
+              mkdir -p /app
+              cat > /app/server.py << 'PYEOF'
+              from flask import Flask, jsonify
+              import subprocess
+              import socket
+              import os
+              app = Flask(__name__)
+
+              @app.route('/metrics')
+              def get_metrics():
+                  try:
+                      # nsenter를 사용하여 호스트의 nvidia-smi 실행
+                      result = subprocess.run(
+                          ['nsenter', '-t', '1', '-m', '-u', '-n', '-i', '--',
+                           'nvidia-smi', '--query-gpu=index,name,temperature.gpu,memory.used,memory.total,utilization.gpu,power.draw,power.limit',
+                           '--format=csv,noheader,nounits'],
+                          capture_output=True, text=True, timeout=10
+                      )
+                      if result.returncode != 0:
+                          return jsonify({"error": f"nvidia-smi failed: {result.stderr}", "node": os.environ.get('NODE_NAME', socket.gethostname())}), 500
+
+                      gpus = []
+                      for line in result.stdout.strip().split('\n'):
+                          if not line:
+                              continue
+                          parts = [p.strip() for p in line.split(',')]
+                          if len(parts) >= 8:
+                              gpus.append({
+                                  "index": int(parts[0]),
+                                  "name": parts[1],
+                                  "temperature": int(parts[2]) if parts[2] not in ['[N/A]', '[Not Supported]'] else 0,
+                                  "memory_used": int(float(parts[3])) if parts[3] not in ['[N/A]', '[Not Supported]'] else 0,
+                                  "memory_total": int(float(parts[4])) if parts[4] not in ['[N/A]', '[Not Supported]'] else 0,
+                                  "utilization": int(parts[5]) if parts[5] not in ['[N/A]', '[Not Supported]'] else 0,
+                                  "power_draw": float(parts[6]) if parts[6] not in ['[N/A]', '[Not Supported]'] else 0,
+                                  "power_limit": float(parts[7]) if parts[7] not in ['[N/A]', '[Not Supported]'] else 0
+                              })
+                      return jsonify({"node": os.environ.get('NODE_NAME', socket.gethostname()), "gpus": gpus})
+                  except Exception as e:
+                      return jsonify({"error": str(e), "node": os.environ.get('NODE_NAME', socket.gethostname())}), 500
+
+              @app.route('/health')
+              def health():
+                  return jsonify({"status": "ok"})
+
+              if __name__ == '__main__':
+                  app.run(host='0.0.0.0', port=9400)
+              PYEOF
+              python3 /app/server.py
+          ports:
+            - containerPort: 9400
+              name: metrics
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          securityContext:
+            privileged: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpu-metrics
+  namespace: dashboard
+spec:
+  selector:
+    app: gpu-metrics
+  clusterIP: None
+  ports:
+    - port: 9400
+      targetPort: 9400
+      name: metrics

@@ -1,0 +1,1 @@
+export { GpuCard } from "./GpuCard";

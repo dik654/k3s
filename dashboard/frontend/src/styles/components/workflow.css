@@ -1,0 +1,420 @@
+/* ============================================
+   Workflow Editor Components
+   ============================================ */
+
+/* Workflow Card Grid */
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Workflow Card */
+.workflow-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.workflow-card:hover {
+  border-color: var(--color-accent-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.workflow-card-content {
+  padding: var(--spacing-md);
+}
+
+.workflow-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-sm);
+}
+
+.workflow-card-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.workflow-card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.workflow-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.workflow-card-actions {
+  display: flex;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.workflow-card-actions .btn-icon {
+  flex: 1;
+  border-radius: 0;
+  padding: 10px 0;
+  font-size: var(--text-xs);
+  justify-content: center;
+}
+
+/* Workflow Editor */
+.workflow-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-bg-primary);
+}
+
+.workflow-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.workflow-editor-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.workflow-editor-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.workflow-name {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.workflow-editor-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Node Panel */
+.node-panel {
+  width: 260px;
+  background: var(--color-bg-card);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.node-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.node-panel-header h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0;
+}
+
+.node-panel-search {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.node-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.node-category {
+  margin-bottom: var(--spacing-md);
+}
+
+.node-category-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+  padding: 0 var(--spacing-xs);
+}
+
+/* Node Item (draggable) */
+.node-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: all var(--transition-fast);
+  background: var(--color-bg-secondary);
+  border: 1px solid transparent;
+  margin-bottom: var(--spacing-xs);
+}
+
+.node-item:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
+}
+
+.node-item:active {
+  cursor: grabbing;
+}
+
+.node-item-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.node-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.node-item-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-item-desc {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Workflow Canvas */
+.workflow-canvas {
+  flex: 1;
+  position: relative;
+  background: #1e293b;
+}
+
+/* Properties Panel */
+.properties-panel {
+  width: 320px;
+  background: var(--color-bg-card);
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.properties-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.properties-panel-header h3 {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.properties-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+.properties-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.properties-section-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Workflow Node (React Flow) */
+.react-flow__node-workflowNode {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.workflow-node {
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-fast);
+}
+
+.workflow-node:hover {
+  border-color: var(--color-text-muted);
+}
+
+.workflow-node.selected {
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.workflow-node-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.workflow-node-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+.workflow-node-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.workflow-node-body {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.workflow-node-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* Node Handles */
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.react-flow__handle:hover {
+  background: var(--color-accent-blue);
+  border-color: var(--color-accent-blue);
+  transform: scale(1.2);
+}
+
+.react-flow__handle-left {
+  left: -6px;
+}
+
+.react-flow__handle-right {
+  right: -6px;
+}
+
+/* Edges */
+.react-flow__edge-path {
+  stroke: var(--color-border);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--color-accent-blue);
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--color-accent-blue);
+}
+
+/* Loading Spinner */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.workflow-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.workflow-empty svg {
+  opacity: 0.5;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Modal */
+.workflow-modal {
+  max-width: 400px;
+}
+
+.workflow-modal .form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.workflow-modal .form-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}

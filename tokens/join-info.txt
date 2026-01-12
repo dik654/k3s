@@ -1,0 +1,16 @@
+============================================
+K3s 클러스터 조인 정보
+============================================
+
+마스터 서버 IP: 14.32.100.220
+K3s API 포트: 6443
+
+노드 토큰 위치: /home/saiadmin/k3s-cluster/tokens/node-token
+
+Worker 노드 조인 명령어:
+curl -sfL https://get.k3s.io | K3S_URL=https://14.32.100.220:6443 K3S_TOKEN=<토큰> sh -
+
+추가 마스터 조인 명령어 (HA):
+curl -sfL https://get.k3s.io | K3S_URL=https://14.32.100.220:6443 K3S_TOKEN=<토큰> sh -s - server
+
+============================================

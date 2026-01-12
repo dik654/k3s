@@ -1,0 +1,526 @@
+/* ============================================
+   Qdrant Page Styles
+   ============================================ */
+
+/* Config Cards */
+.config-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.config-card:hover {
+  border-color: var(--color-text-muted);
+}
+
+.config-card.selected {
+  border-color: var(--color-accent-blue);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.config-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.config-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.config-card-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.config-delete-btn {
+  padding: var(--spacing-xs);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.config-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-accent-red);
+}
+
+.config-card-params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.param-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.param-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.param-value {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.param-value.success {
+  color: var(--color-accent-green);
+}
+
+/* RAG Guide Card */
+.rag-guide-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.guide-header {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.guide-nav {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.guide-nav button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.guide-nav button:hover {
+  color: var(--color-text-secondary);
+}
+
+.guide-nav button.active {
+  color: var(--color-accent-blue);
+  border-bottom-color: var(--color-accent-blue);
+}
+
+.guide-content {
+  padding: var(--spacing-md);
+}
+
+/* Strategy Accordion */
+.strategies-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.strategy-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.strategy-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  text-align: left;
+}
+
+.strategy-icon {
+  font-size: var(--text-lg);
+}
+
+.strategy-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.strategy-content {
+  padding: var(--spacing-md);
+  background: var(--color-bg-primary);
+}
+
+/* Collections Grid */
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.collection-item {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+}
+
+.col-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.col-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.col-example {
+  font-size: var(--text-xs);
+  color: var(--color-accent-blue);
+  margin-top: var(--spacing-xs);
+  font-family: monospace;
+}
+
+/* Pros Cons */
+.pros-cons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.pros, .cons {
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.pros {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.cons {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.pros h5, .cons h5 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--text-sm);
+}
+
+.pros ul, .cons ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+  font-size: var(--text-sm);
+}
+
+/* Fields Grid */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.fields-column h5 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.field-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.field-name {
+  font-weight: 600;
+  color: var(--color-accent-blue);
+  font-size: var(--text-sm);
+}
+
+.field-type {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.filter-badge {
+  font-size: 10px;
+  background: rgba(234, 179, 8, 0.1);
+  color: var(--color-accent-yellow);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.field-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.field-example {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+.filter-example {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.filter-example pre {
+  margin: var(--spacing-sm) 0 0 0;
+  background: var(--color-bg-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  overflow-x: auto;
+}
+
+/* RBAC Section */
+.rbac-approaches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.approach-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.approach-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.approach-header h5 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.approach-impl {
+  font-size: var(--text-xs);
+  color: var(--color-accent-blue);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.approach-code {
+  background: var(--color-bg-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  overflow-x: auto;
+  margin: 0;
+}
+
+.best-practices {
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.best-practices h5 {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-accent-green);
+}
+
+.best-practices ul {
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+/* Chunking Grid */
+.chunking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.chunking-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.chunking-type {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.chunking-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+}
+
+.detail-row .label {
+  color: var(--color-text-muted);
+}
+
+.detail-row .value {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.chunking-tip {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-accent-blue);
+  font-style: italic;
+}
+
+/* Optimization Grid */
+.optimization-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.tip-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.tip-card h5 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-weight: 600;
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Tasks Grid */
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.task-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.task-frequency {
+  font-size: var(--text-xs);
+  color: var(--color-accent-blue);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.backup-section {
+  margin-top: var(--spacing-md);
+}
+
+/* Stat Item */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Loading Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: var(--spacing-md);
+}
+
+/* Results List */
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.result-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.result-metric {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.result-metric.success {
+  color: var(--color-accent-green);
+}

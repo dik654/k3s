@@ -1,0 +1,305 @@
+/* ============================================
+   Pods Page Styles
+   ============================================ */
+
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: var(--color-bg-secondary);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.toggle-btn:hover {
+  color: var(--color-text-secondary);
+}
+
+.toggle-btn.active {
+  background: var(--color-accent-blue);
+  color: white;
+}
+
+/* Node Group */
+.node-group {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.node-group:last-child {
+  border-bottom: none;
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.node-header:hover {
+  background: var(--color-bg-hover);
+}
+
+.node-icon {
+  color: var(--color-accent-blue);
+}
+
+.node-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.node-count {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.node-pods {
+  padding: 0 var(--spacing-md) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Pod namespace in node view */
+.pod-namespace {
+  font-size: var(--text-xs);
+  color: var(--color-accent-blue);
+  font-weight: 500;
+}
+
+/* Pod config button */
+.pod-config-btn {
+  padding: var(--spacing-xs);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+}
+
+.pod-item:hover .pod-config-btn {
+  opacity: 1;
+}
+
+.pod-config-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-accent-blue);
+}
+
+/* Pod Config Modal */
+.pod-config-modal {
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pod-config-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.pod-config-modal .modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.pod-config-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+/* Config Section */
+.config-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.config-section h4 {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.config-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.config-value {
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+}
+
+.config-value.status-running {
+  color: var(--color-accent-green);
+}
+
+.config-value.status-pending {
+  color: var(--color-accent-yellow);
+}
+
+.config-value.status-failed {
+  color: var(--color-accent-red);
+}
+
+/* Resource Bars in Modal */
+.resource-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.resource-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.resource-bar-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.resource-bar-value {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Container Info */
+.container-info {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.container-header {
+  margin-bottom: var(--spacing-xs);
+}
+
+.container-name {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-accent-blue);
+}
+
+.container-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.container-image,
+.container-resources,
+.container-ports {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.container-image code {
+  font-size: var(--text-xs);
+  background: var(--color-bg-primary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+.resource-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.port-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.port-badge {
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-accent-blue);
+  border-radius: var(--radius-sm);
+}
+
+/* Labels List in Modal */
+.labels-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.label-tag {
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-family: 'Consolas', 'Monaco', monospace;
+}

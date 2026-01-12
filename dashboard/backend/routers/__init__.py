@@ -12,6 +12,10 @@ from .qdrant import router as qdrant_router
 from .vllm import router as vllm_router
 from .comfyui import router as comfyui_router
 from .health import router as health_router
+from .longhorn import router as longhorn_router
+from .events import router as events_router
+from .pipeline import router as pipeline_router
+from .vectordb import router as vectordb_router
 
 __all__ = [
     'workflow_router',
@@ -27,4 +31,8 @@ __all__ = [
     'vllm_router',
     'comfyui_router',
     'health_router',
+    'longhorn_router',
+    'events_router',
+    'pipeline_router',
+    'vectordb_router',
 ]

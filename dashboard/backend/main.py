@@ -40,6 +40,20 @@ from routers.health import router as health_router
 from routers.vllm import router as vllm_router
 from routers.ontology import router as ontology_router
 from routers.comfyui import router as comfyui_router
+from routers.parser import router as parser_router
+from routers.cluster import router as cluster_router
+from routers.workloads import router as workloads_router
+from routers.gpu import router as gpu_router
+from routers.pods import router as pods_router
+from routers.storage import router as storage_router
+from routers.benchmark import router as benchmark_router
+from routers.embedding import router as embedding_router
+from routers.longhorn import router as longhorn_router
+from routers.qdrant import router as qdrant_router
+from routers.langgraph import router as langgraph_router
+from routers.events import router as events_router
+from routers.pipeline import router as pipeline_router
+from routers.vectordb import router as vectordb_router
 
 # 임베딩 모델 전역 변수 (지연 로딩)
 _embedding_models = {}  # {model_name: model_instance}
@@ -153,6 +167,20 @@ app.include_router(health_router)
 app.include_router(vllm_router)
 app.include_router(ontology_router)
 app.include_router(comfyui_router)
+app.include_router(parser_router)
+app.include_router(cluster_router)
+app.include_router(workloads_router)
+app.include_router(gpu_router)
+app.include_router(pods_router)
+app.include_router(storage_router)
+app.include_router(benchmark_router)
+app.include_router(embedding_router)
+app.include_router(longhorn_router)
+app.include_router(qdrant_router)
+app.include_router(langgraph_router)
+app.include_router(events_router)
+app.include_router(pipeline_router)
+app.include_router(vectordb_router)
 
 # Kubernetes 클라이언트 초기화
 def get_k8s_clients():

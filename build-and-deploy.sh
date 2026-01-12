@@ -214,7 +214,29 @@ else
 fi
 
 ##############################################################################
-# 4. K8s 배포
+# 4. K8s containerd 이미지 캐시 정리 (재배포 문제 해결)
+##############################################################################
+
+if [ "$SKIP_DEPLOY" = false ] && [ "$FORCE_RESTART" = true ]; then
+    log_info "K8s containerd 이미지 캐시 정리 중..."
+
+    # k3s ctr을 사용하여 기존 이미지 삭제
+    if command -v k3s &> /dev/null; then
+        log_info "기존 $IMAGE_NAME 이미지 삭제 중..."
+        k3s ctr images list 2>/dev/null | grep "$IMAGE_NAME" | awk '{print $1}' | while read img; do
+            if [ -n "$img" ]; then
+                log_info "  삭제: $img"
+                k3s ctr images rm "$img" 2>/dev/null || true
+            fi
+        done
+        log_success "containerd 이미지 캐시 정리 완료"
+    else
+        log_warn "k3s가 설치되지 않음 - containerd 캐시 정리 스킵"
+    fi
+fi
+
+##############################################################################
+# 5. K8s 배포
 ##############################################################################
 
 if [ "$SKIP_DEPLOY" = false ]; then
@@ -226,25 +248,41 @@ if [ "$SKIP_DEPLOY" = false ]; then
         kubectl create namespace "$NAMESPACE"
     fi
 
+    # 타임스탬프 태그로 이미지 버전 관리 (캐시 문제 해결)
+    TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    VERSIONED_IMAGE="${IMAGE_NAME}:v${TIMESTAMP}"
+
+    # 빌드를 스킵하지 않았으면 새 태그 추가
+    if [ "$SKIP_BUILD" = false ]; then
+        log_info "버전 태그 추가: $VERSIONED_IMAGE"
+        docker tag "$FULL_IMAGE" "$VERSIONED_IMAGE" 2>/dev/null || true
+        DEPLOY_IMAGE="$VERSIONED_IMAGE"
+    else
+        DEPLOY_IMAGE="$FULL_IMAGE"
+    fi
+
     # 현재 배포 상태 확인
     if kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" &> /dev/null; then
         log_info "기존 Deployment 찾음: $DEPLOYMENT_NAME"
 
         # 이미지 업데이트
-        log_info "Deployment 이미지 업데이트 중: $FULL_IMAGE"
+        log_info "Deployment 이미지 업데이트 중: $DEPLOY_IMAGE"
         kubectl set image deployment/$DEPLOYMENT_NAME \
-            dashboard="$FULL_IMAGE" \
+            dashboard="$DEPLOY_IMAGE" \
             -n "$NAMESPACE" \
-            --record
+            --record 2>/dev/null || kubectl set image deployment/$DEPLOYMENT_NAME \
+            dashboard="$DEPLOY_IMAGE" \
+            -n "$NAMESPACE"
 
-        # Pod 재시작
+        # Pod 재시작 (항상 rollout restart 실행)
         if [ "$FORCE_RESTART" = true ]; then
             log_info "Pod 강제 재시작 중..."
             kubectl rollout restart deployment/$DEPLOYMENT_NAME -n "$NAMESPACE"
-        else
-            log_info "자동 롤아웃 대기 중..."
-            kubectl rollout status deployment/$DEPLOYMENT_NAME -n "$NAMESPACE" --timeout=5m
         fi
+
+        # 롤아웃 상태 확인
+        log_info "롤아웃 상태 대기 중..."
+        kubectl rollout status deployment/$DEPLOYMENT_NAME -n "$NAMESPACE" --timeout=5m
 
         log_success "Deployment 업데이트 완료"
     else
@@ -271,7 +309,7 @@ else
 fi
 
 ##############################################################################
-# 5. 배포 후 확인
+# 6. 배포 후 확인
 ##############################################################################
 
 log_info "배포 상태 최종 확인..."
@@ -309,7 +347,7 @@ if kubectl get deployment "$DEPLOYMENT_NAME" -n "$NAMESPACE" &> /dev/null; then
 fi
 
 ##############################################################################
-# 6. 완료
+# 7. 완료
 ##############################################################################
 
 log_success "배포 프로세스 완료!"
@@ -326,9 +364,16 @@ if [ -n "$INGRESS_HOST" ]; then
     echo "  http://$INGRESS_HOST"
 fi
 echo ""
+log_info "🐳 현재 실행 중인 이미지:"
+kubectl get pods -n "$NAMESPACE" -l "app=$DEPLOYMENT_NAME" \
+    -o jsonpath='{range .items[*]}{.spec.containers[*].image}{"\n"}{end}' 2>/dev/null | head -1 || true
+echo ""
 log_info "📝 다음 명령어로 로그를 확인할 수 있습니다:"
 echo "  kubectl logs -n $NAMESPACE -l app=$DEPLOYMENT_NAME -f"
 echo ""
 log_info "⚠️  브라우저 캐시 초기화:"
 echo "  Windows/Linux: Ctrl + Shift + R"
 echo "  Mac: Cmd + Shift + R"
+echo ""
+log_info "💡 이미지 캐시 문제 발생 시:"
+echo "  $0 --no-cache --force-restart"

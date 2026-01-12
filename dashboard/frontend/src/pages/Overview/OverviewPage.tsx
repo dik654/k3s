@@ -810,14 +810,28 @@ export function OverviewPage() {
                                 color: 'var(--text-secondary)'
                               }}
                             >
-                              <div>
-                                <strong>{pod.pod}</strong>
-                                <span style={{ marginLeft: 8, color: 'var(--accent-blue)' }}>
-                                  {pod.gpu_count} GPU{pod.gpu_count > 1 ? 's' : ''}
-                                </span>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div>
+                                  <strong>{pod.pod}</strong>
+                                  <span style={{ marginLeft: 8, color: 'var(--accent-blue)' }}>
+                                    {pod.gpu_count} GPU{pod.gpu_count > 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                                {pod.gpu_indices && pod.gpu_indices.length > 0 && (
+                                  <span style={{
+                                    fontSize: 10,
+                                    color: 'var(--accent-green)',
+                                    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                                    padding: '2px 6px',
+                                    borderRadius: 4
+                                  }}>
+                                    GPU #{pod.gpu_indices.join(', #')}
+                                  </span>
+                                )}
                               </div>
-                              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
-                                {pod.namespace} / {pod.container}
+                              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, display: 'flex', gap: 8 }}>
+                                <span>{pod.namespace} / {pod.container}</span>
+                                {pod.node && <span style={{ color: 'var(--accent-yellow)' }}>@ {pod.node}</span>}
                               </div>
                             </div>
                           ))}

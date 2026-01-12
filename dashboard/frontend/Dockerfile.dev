@@ -1,0 +1,16 @@
+# 개발용 Dockerfile - Vite 핫 리로드 지원
+FROM node:20-alpine
+
+WORKDIR /app
+
+# package.json 복사 및 의존성 설치
+COPY package*.json ./
+RUN npm install
+
+# 소스 코드는 볼륨으로 마운트됨
+# COPY . .
+
+EXPOSE 5173
+
+# Vite 개발 서버 - host 0.0.0.0으로 외부 접속 허용
+CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "5173"]

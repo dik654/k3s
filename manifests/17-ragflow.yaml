@@ -1,0 +1,512 @@
+# RAGflow - Open-source RAG Engine
+# RAG 파이프라인, 지식 베이스 관리, 대화형 AI
+# 의존성: MySQL, Redis, Elasticsearch
+---
+# RAGflow 스토리지 (데이터, 로그)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ragflow-data-pv
+  labels:
+    type: local
+    app: ragflow
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/ragflow/data
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ragflow-data-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      app: ragflow
+---
+# MySQL (RAGflow 메타데이터 저장)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ragflow-mysql-pv
+  labels:
+    type: local
+    app: ragflow-mysql
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/ragflow/mysql
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ragflow-mysql-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  selector:
+    matchLabels:
+      app: ragflow-mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragflow-mysql
+  namespace: ai-workloads
+  labels:
+    app: ragflow-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragflow-mysql
+  template:
+    metadata:
+      labels:
+        app: ragflow-mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "ragflow123"
+        - name: MYSQL_DATABASE
+          value: "ragflow"
+        - name: MYSQL_USER
+          value: "ragflow"
+        - name: MYSQL_PASSWORD
+          value: "ragflow123"
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        livenessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "localhost"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "localhost"]
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: ragflow-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow-mysql
+  namespace: ai-workloads
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    name: mysql
+  selector:
+    app: ragflow-mysql
+---
+# Redis (RAGflow 캐시)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragflow-redis
+  namespace: ai-workloads
+  labels:
+    app: ragflow-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragflow-redis
+  template:
+    metadata:
+      labels:
+        app: ragflow-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow-redis
+  namespace: ai-workloads
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app: ragflow-redis
+---
+# Elasticsearch (RAGflow 검색)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ragflow-es-pv
+  labels:
+    type: local
+    app: ragflow-es
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/k3s/ragflow/elasticsearch
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ragflow-es-pvc
+  namespace: ai-workloads
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  selector:
+    matchLabels:
+      app: ragflow-es
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragflow-elasticsearch
+  namespace: ai-workloads
+  labels:
+    app: ragflow-elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragflow-elasticsearch
+  template:
+    metadata:
+      labels:
+        app: ragflow-elasticsearch
+    spec:
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:8.11.1
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        env:
+        - name: discovery.type
+          value: "single-node"
+        - name: ES_JAVA_OPTS
+          value: "-Xms2g -Xmx2g"
+        - name: xpack.security.enabled
+          value: "false"
+        - name: xpack.security.enrollment.enabled
+          value: "false"
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+        livenessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      volumes:
+      - name: es-data
+        persistentVolumeClaim:
+          claimName: ragflow-es-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow-elasticsearch
+  namespace: ai-workloads
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9200
+    targetPort: 9200
+    name: http
+  - port: 9300
+    targetPort: 9300
+    name: transport
+  selector:
+    app: ragflow-elasticsearch
+---
+# RAGflow Main Service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ragflow-config
+  namespace: ai-workloads
+data:
+  service_conf.yaml: |
+    ragflow:
+      host: 0.0.0.0
+      port: 9380
+    mysql:
+      host: ragflow-mysql
+      port: 3306
+      user: ragflow
+      password: ragflow123
+      database: ragflow
+    redis:
+      host: ragflow-redis
+      port: 6379
+    es:
+      host: ragflow-elasticsearch
+      port: 9200
+    minio:
+      host: minio-service.storage.svc.cluster.local
+      port: 9000
+      access_key: minioadmin
+      secret_key: minioadmin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ragflow
+  namespace: ai-workloads
+  labels:
+    app: ragflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ragflow
+  template:
+    metadata:
+      labels:
+        app: ragflow
+    spec:
+      containers:
+      - name: ragflow
+        image: infiniflow/ragflow:latest
+        ports:
+        - containerPort: 9380
+          name: http
+        - containerPort: 80
+          name: web
+        env:
+        - name: MYSQL_HOST
+          value: "ragflow-mysql"
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_USER
+          value: "ragflow"
+        - name: MYSQL_PASSWORD
+          value: "ragflow123"
+        - name: MYSQL_DATABASE
+          value: "ragflow"
+        - name: REDIS_HOST
+          value: "ragflow-redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: ES_HOST
+          value: "ragflow-elasticsearch"
+        - name: ES_PORT
+          value: "9200"
+        - name: MINIO_HOST
+          value: "minio-service.storage.svc.cluster.local"
+        - name: MINIO_PORT
+          value: "9000"
+        - name: MINIO_ACCESS_KEY
+          value: "minioadmin"
+        - name: MINIO_SECRET_KEY
+          value: "minioadmin"
+        resources:
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+        volumeMounts:
+        - name: ragflow-data
+          mountPath: /ragflow/data
+        - name: config
+          mountPath: /ragflow/conf/service_conf.yaml
+          subPath: service_conf.yaml
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: 9380
+          initialDelaySeconds: 120
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: 9380
+          initialDelaySeconds: 60
+          periodSeconds: 10
+      volumes:
+      - name: ragflow-data
+        persistentVolumeClaim:
+          claimName: ragflow-data-pvc
+      - name: config
+        configMap:
+          name: ragflow-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow
+  namespace: ai-workloads
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9380
+    targetPort: 9380
+    name: api
+  - port: 80
+    targetPort: 80
+    name: web
+  selector:
+    app: ragflow
+---
+# RAGflow 외부 접속용 NodePort Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragflow-external
+  namespace: ai-workloads
+spec:
+  type: NodePort
+  ports:
+  - port: 9380
+    targetPort: 9380
+    nodePort: 30380
+    name: api
+  - port: 80
+    targetPort: 80
+    nodePort: 30081
+    name: web
+  selector:
+    app: ragflow
+---
+# RAGflow Ingress (외부 접속)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ragflow
+  namespace: ai-workloads
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: ragflow.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ragflow
+            port:
+              number: 80
+---
+# RAGflow API Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ragflow-api
+  namespace: ai-workloads
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: ragflow-api.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ragflow
+            port:
+              number: 9380

@@ -43,6 +43,26 @@ WORKLOADS = {
         "namespace": "logging",
         "daemonset": "promtail",
         "description": "Promtail 로그 수집기 (각 노드)"
+    },
+    "ragflow": {
+        "namespace": "ai-workloads",
+        "deployment": "ragflow",
+        "description": "RAGflow RAG 엔진 (지식 베이스, 대화형 AI)"
+    },
+    "ragflow-mysql": {
+        "namespace": "ai-workloads",
+        "deployment": "ragflow-mysql",
+        "description": "RAGflow MySQL (메타데이터)"
+    },
+    "ragflow-redis": {
+        "namespace": "ai-workloads",
+        "deployment": "ragflow-redis",
+        "description": "RAGflow Redis (캐시)"
+    },
+    "ragflow-elasticsearch": {
+        "namespace": "ai-workloads",
+        "deployment": "ragflow-elasticsearch",
+        "description": "RAGflow Elasticsearch (검색 인덱스)"
     }
 }
 
@@ -108,3 +128,7 @@ QDRANT_URL = "http://qdrant-service.ai-workloads.svc.cluster.local:6333"
 
 # Neo4j 설정
 NEO4J_URL = "bolt://neo4j-service.ai-workloads.svc.cluster.local:7687"
+
+# RAGflow 설정
+RAGFLOW_API_URL = "http://ragflow.ai-workloads.svc.cluster.local:9380"
+RAGFLOW_WEB_URL = "http://ragflow.ai-workloads.svc.cluster.local:80"

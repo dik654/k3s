@@ -52,30 +52,69 @@ metadata:
   namespace: k3s-dashboard
   labels:
     app: k3s-dashboard
+  annotations:
+    # 이 annotation이 변경되면 Pod가 재시작됨
+    kubernetes.io/change-cause: "Initial deployment"
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: k3s-dashboard
+  # 새 Pod 먼저 생성 후 기존 Pod 삭제 (무중단 배포)
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       labels:
         app: k3s-dashboard
+      annotations:
+        # rollout restart 시 이 값이 변경되어 Pod 재생성
+        kubectl.kubernetes.io/restartedAt: ""
     spec:
       serviceAccountName: k3s-dashboard
+      # 이미지 Pull 전에 기존 Pod 종료 대기 시간
+      terminationGracePeriodSeconds: 10
       containers:
       - name: dashboard
+        # 이미지 태그는 배포 스크립트에서 동적으로 변경됨
+        # 예: k3s-dashboard:v20240115-123456
         image: k3s-dashboard:latest
-        imagePullPolicy: Never
+        # IfNotPresent: 로컬에 있으면 사용, 없으면 풀
+        # 타임스탬프 태그를 사용하면 항상 새 이미지로 인식됨
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+          name: http
+        # 컨테이너 상태 확인
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
         resources:
           requests:
             memory: "256Mi"
             cpu: "100m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "1Gi"
+            cpu: "1000m"
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
 ---
 apiVersion: v1
 kind: Service
